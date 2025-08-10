@@ -28,8 +28,13 @@
 /** @brief Overflow bucket size. */
 #define OVERFLOW_BUCKET_SIZE 3
 
+#define MAX_DENSE_NUM 15
+
 /** @brief Total bucket size. */
 #define TOTAL_BUCKET_SIZE (DENSE_BUCKET_SIZE + OVERFLOW_BUCKET_SIZE)
+
+/** @brief Bitset capacity. */
+#define BITSET_CAPACITY 64
 
 namespace bustub {
 
@@ -82,16 +87,37 @@ class HyperLogLogPresto {
     return 0;
   }
 
+  /** @brief Function that computes binary.
+   *
+   * @param[in] hash
+   * @returns binary of a given hash
+   */
+  auto ComputeBinary(const hash_t &hash) const -> std::bitset<BITSET_CAPACITY>;
+
+  /** @brief Function that finds the position of leftmost one.
+   *
+   * @param[in] bset
+   * @returns position of leftmost one
+   */
+  auto NumberOfRightmostZero(const std::bitset<BITSET_CAPACITY> &bset) const -> uint64_t;
+
+  auto GetDeltaOfIndex(uint16_t idx) const -> uint16_t;
+  auto SetDeltaOfIndex(uint16_t idx, uint16_t cnt) -> void;
+  auto RecalculateBaselineAndDelta() -> void;
+
   /** @brief Structure holding dense buckets (or also known as registers). */
   std::vector<std::bitset<DENSE_BUCKET_SIZE>> dense_bucket_;
+
+  int16_t n_leading_bits_;
 
   /** @brief Structure holding overflow buckets. */
   std::unordered_map<uint16_t, std::bitset<OVERFLOW_BUCKET_SIZE>> overflow_bucket_;
 
   /** @brief Storing cardinality value */
   uint64_t cardinality_;
-
-  // TODO(student) - can add more data structures as required
+  uint16_t baseline_;
+  uint16_t bucket_count_;
+  std::mutex m;
 };
 
 }  // namespace bustub

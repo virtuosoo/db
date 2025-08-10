@@ -11,8 +11,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "primer/hyperloglog.h"
-
-double CONSTANT = 0.79402;
 #define MAX_NBITS 16
 
 namespace bustub {

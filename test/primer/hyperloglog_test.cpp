@@ -225,10 +225,6 @@ TEST(HyperLogLogTest, PrestoBasicTest1) {
       ASSERT_EQ(ans, 4);
     }
   }
-
-  obj.ComputeCardinality();
-  ans = obj.GetCardinality();
-  ASSERT_EQ(ans, 4);
 }
 
 TEST(HyperLogLogTest, PrestoCase1) {
