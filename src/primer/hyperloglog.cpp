@@ -74,7 +74,7 @@ auto HyperLogLog<KeyType>::AddElem(KeyType val) -> void {
   hash_t hash = CalculateHash(val);
   std::bitset<BITSET_CAPACITY> bset = ComputeBinary(hash);
   uint64_t leftmost1 = PositionOfLeftmostOne(bset);
-  
+
   size_t index = 0;
   for (int i = BITSET_CAPACITY - 1; i >= BITSET_CAPACITY - n_bits_; i--) {
     index += (1 << (n_bits_ - (BITSET_CAPACITY - i))) * bset[i];

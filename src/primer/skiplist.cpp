@@ -113,10 +113,10 @@ SKIPLIST_TEMPLATE_ARGUMENTS void SkipList<K, Compare, MaxHeight, Seed>::Print() 
  */
 SKIPLIST_TEMPLATE_ARGUMENTS auto SkipList<K, Compare, MaxHeight, Seed>::RandomHeight() -> size_t {
   // Branching factor (1 in 4 chance), see Pugh's paper.
-  static constexpr unsigned int branching_factor = 4;
+  static constexpr unsigned int BRANCHING_FACTOR = 4;
   // Start with the minimum height
   size_t height = 1;
-  while (height < MaxHeight && (rng_() % branching_factor == 0)) {
+  while (height < MaxHeight && (rng_() % BRANCHING_FACTOR == 0)) {
     height++;
   }
   return height;

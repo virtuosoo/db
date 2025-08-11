@@ -80,4 +80,4 @@ class HyperLogLog {
   std::mutex m;
 };
 
-}  // namespace bustub;
+}  // namespace bustub
