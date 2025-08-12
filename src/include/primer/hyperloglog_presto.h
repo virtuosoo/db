@@ -102,7 +102,7 @@ class HyperLogLogPresto {
   auto NumberOfRightmostZero(const std::bitset<BITSET_CAPACITY> &bset) const -> uint64_t;
 
   auto GetDeltaOfIndex(uint16_t idx) const -> uint16_t;
-  auto SetDeltaOfIndex(uint16_t idx, uint16_t cnt) -> void;
+  auto SetDeltaOfIndex(uint16_t idx, uint16_t delta) -> void;
   auto RecalculateBaselineAndDelta() -> void;
 
   /** @brief Structure holding dense buckets (or also known as registers). */
@@ -117,7 +117,7 @@ class HyperLogLogPresto {
   uint64_t cardinality_;
   uint16_t baseline_;
   uint16_t bucket_count_;
-  std::mutex m;
+  std::mutex mutex_;
 };
 
 }  // namespace bustub

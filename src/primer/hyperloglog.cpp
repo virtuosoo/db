@@ -36,8 +36,8 @@ template <typename KeyType>
 auto HyperLogLog<KeyType>::ComputeBinary(const hash_t &hash) const -> std::bitset<BITSET_CAPACITY> {
   std::bitset<BITSET_CAPACITY> bset;
   for (size_t i = 0; i < BITSET_CAPACITY; i++) {
-    if ((hash >> i) & 1) {
-      bset[i] = 1;
+    if (((hash >> i) & 1) != 0) {
+      bset[i] = true;
     }
   }
   return bset;
@@ -53,7 +53,7 @@ template <typename KeyType>
 auto HyperLogLog<KeyType>::PositionOfLeftmostOne(const std::bitset<BITSET_CAPACITY> &bset) const -> uint64_t {
   uint64_t cnt = 0;
   for (int i = BITSET_CAPACITY - 1 - n_bits_; i >= 0; i--) {
-    if (bset[i] == 0) {
+    if (!bset[i]) {
       cnt++;
     } else {
       break;
@@ -69,7 +69,7 @@ auto HyperLogLog<KeyType>::PositionOfLeftmostOne(const std::bitset<BITSET_CAPACI
  */
 template <typename KeyType>
 auto HyperLogLog<KeyType>::AddElem(KeyType val) -> void {
-  std::scoped_lock slk(m);
+  std::scoped_lock slk(mutex_);
 
   hash_t hash = CalculateHash(val);
   std::bitset<BITSET_CAPACITY> bset = ComputeBinary(hash);
@@ -77,7 +77,7 @@ auto HyperLogLog<KeyType>::AddElem(KeyType val) -> void {
 
   size_t index = 0;
   for (int i = BITSET_CAPACITY - 1; i >= BITSET_CAPACITY - n_bits_; i--) {
-    index += (1 << (n_bits_ - (BITSET_CAPACITY - i))) * bset[i];
+    index += (1 << (n_bits_ - (BITSET_CAPACITY - i))) * static_cast<int>(bset[i]);
   }
   bucket_values_[index] = std::max(bucket_values_[index], leftmost1);
 }
@@ -87,7 +87,7 @@ auto HyperLogLog<KeyType>::AddElem(KeyType val) -> void {
  */
 template <typename KeyType>
 auto HyperLogLog<KeyType>::ComputeCardinality() -> void {
-  std::scoped_lock slk(m);
+  std::scoped_lock slk(mutex_);
 
   double sum = 0.0;
   for (size_t i = 0; i < bucket_count_; i++) {

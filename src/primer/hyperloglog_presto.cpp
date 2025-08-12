@@ -35,8 +35,8 @@ template <typename KeyType>
 auto HyperLogLogPresto<KeyType>::ComputeBinary(const hash_t &hash) const -> std::bitset<BITSET_CAPACITY> {
   std::bitset<BITSET_CAPACITY> bset;
   for (size_t i = 0; i < BITSET_CAPACITY; i++) {
-    if ((hash >> i) & 1) {
-      bset[i] = 1;
+    if (((hash >> i) & 1) != 0) {
+      bset[i] = true;
     }
   }
   return bset;
@@ -51,7 +51,7 @@ template <typename KeyType>
 auto HyperLogLogPresto<KeyType>::NumberOfRightmostZero(const std::bitset<BITSET_CAPACITY> &bset) const -> uint64_t {
   u_int64_t res = 0;
   for (int i = 0; i < BITSET_CAPACITY - n_leading_bits_; i++) {
-    if (bset[i] == 0) {
+    if (!bset[i]) {
       res++;
     } else {
       break;
@@ -67,14 +67,14 @@ auto HyperLogLogPresto<KeyType>::GetDeltaOfIndex(uint16_t idx) const -> uint16_t
   }
 
   uint16_t delta = 0;
-  auto denseBucket = dense_bucket_[idx];
+  auto dense_bucket = dense_bucket_[idx];
   for (int i = 0; i < DENSE_BUCKET_SIZE; ++i) {
-    delta += (1 << i) * denseBucket[i];
+    delta += (1 << i) * static_cast<int>(dense_bucket[i]);
   }
   if (overflow_bucket_.find(idx) != overflow_bucket_.end()) {
     auto overflow = overflow_bucket_.at(idx);
     for (int i = 0; i < OVERFLOW_BUCKET_SIZE; ++i) {
-      delta += (1 << (i + DENSE_BUCKET_SIZE)) * overflow[i];
+      delta += (1 << (i + DENSE_BUCKET_SIZE)) * static_cast<int>(overflow[i]);
     }
   }
   return delta;
@@ -84,15 +84,15 @@ template <typename KeyType>
 auto HyperLogLogPresto<KeyType>::SetDeltaOfIndex(uint16_t idx, uint16_t delta) -> void {
   dense_bucket_[idx].reset();
   for (int i = 0; i < DENSE_BUCKET_SIZE; ++i) {
-    if ((delta >> i) & 1) {
-      dense_bucket_[idx][i] = 1;
+    if (((delta >> i) & 1) != 0) {
+      dense_bucket_[idx][i] = true;
     }
   }
   if (delta > MAX_DENSE_NUM) {
     std::bitset<OVERFLOW_BUCKET_SIZE> overflow;
     for (int i = 0; i < OVERFLOW_BUCKET_SIZE; ++i) {
-      if ((delta >> (i + DENSE_BUCKET_SIZE)) & 1) {
-        overflow[i] = 1;
+      if (((delta >> (i + DENSE_BUCKET_SIZE)) & 1) != 0) {
+        overflow[i] = true;
       }
     }
     overflow_bucket_[idx] = overflow;
@@ -120,7 +120,7 @@ auto HyperLogLogPresto<KeyType>::RecalculateBaselineAndDelta() -> void {
 /** @brief Element is added for HLL calculation. */
 template <typename KeyType>
 auto HyperLogLogPresto<KeyType>::AddElem(KeyType val) -> void {
-  std::scoped_lock slk(m);
+  std::scoped_lock slk(mutex_);
 
   hash_t hash = CalculateHash(val);
   std::bitset<BITSET_CAPACITY> bset = ComputeBinary(hash);
@@ -128,7 +128,7 @@ auto HyperLogLogPresto<KeyType>::AddElem(KeyType val) -> void {
 
   size_t index = 0;
   for (int i = BITSET_CAPACITY - 1; i >= BITSET_CAPACITY - n_leading_bits_; i--) {
-    index += (1 << (n_leading_bits_ - (BITSET_CAPACITY - i))) * bset[i];
+    index += (1 << (n_leading_bits_ - (BITSET_CAPACITY - i))) * static_cast<int>(bset[i]);
   }
 
   std::cout << "add elem, index: " << index << " hash: " << hash << " zeros: " << zeros << '\n';
@@ -142,7 +142,7 @@ auto HyperLogLogPresto<KeyType>::AddElem(KeyType val) -> void {
 /** @brief Function to compute cardinality. */
 template <typename T>
 auto HyperLogLogPresto<T>::ComputeCardinality() -> void {
-  std::scoped_lock slk(m);
+  std::scoped_lock slk(mutex_);
 
   double sum = 0.0;
   for (uint16_t i = 0; i < bucket_count_; i++) {

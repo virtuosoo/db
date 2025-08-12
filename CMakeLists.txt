@@ -1,4 +1,14 @@
 cmake_minimum_required(VERSION 3.10)
+
+# Set clang as the compiler (clang-14 is the default)
+set(CMAKE_C_COMPILER clang)
+set(CMAKE_CXX_COMPILER clang++)
+
+# Use libc++ instead of libstdc++
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -stdlib=libc++")
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # For clang-tidy.
 set(BUILD_SHARED_LIBS OFF) # We expect external libraries to be linked statically.
 set(CMAKE_CXX_STANDARD 17) # Compile as C++17.
@@ -256,8 +266,10 @@ add_custom_target(fix-clang-tidy-diff
 # hardcode some files to check here for each project.
 # ##########################################################
 set(P0_FILES
-        "src/include/primer/skiplist.h"
-        "src/primer/skiplist.cpp"
+        "src/include/primer/hyperloglog.h"
+        "src/primer/hyperloglog.cpp"
+        "src/include/primer/hyperloglog_presto.h"
+        "src/primer/hyperloglog_presto.cpp"
 )
 
 add_custom_target(check-clang-tidy-p0

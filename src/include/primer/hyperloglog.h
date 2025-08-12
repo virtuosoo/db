@@ -77,7 +77,7 @@ class HyperLogLog {
   size_t bucket_count_;
   std::vector<size_t> bucket_values_;
 
-  std::mutex m;
+  std::mutex mutex_;
 };
 
 }  // namespace bustub
