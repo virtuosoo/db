@@ -18,6 +18,8 @@
 #include <optional>
 #include <unordered_map>
 #include <vector>
+#include <set>
+
 
 #include "common/config.h"
 #include "common/macros.h"
@@ -27,14 +29,34 @@ namespace bustub {
 enum class AccessType { Unknown = 0, Lookup, Scan, Index };
 
 class LRUKNode {
- private:
+public:
+  LRUKNode(frame_id_t fid, size_t k, size_t time_stamp):fid_(fid), last_access_timestamp_(time_stamp), k_(k){}
+
+  bool operator<(const LRUKNode& other) const {
+    auto this_key = getSortingKey();
+    auto other_key = other.getSortingKey();
+    if (this_key != other_key) {
+      return this_key < other_key;
+    }
+
+    return last_access_timestamp_ < other.last_access_timestamp_;
+  }
   /** History of last seen K timestamps of this page. Least recent timestamp stored in front. */
   // Remove maybe_unused if you start using them. Feel free to change the member variables as you want.
 
-  [[maybe_unused]] std::list<size_t> history_;
-  [[maybe_unused]] size_t k_;
-  [[maybe_unused]] frame_id_t fid_;
-  [[maybe_unused]] bool is_evictable_{false};
+  frame_id_t fid_;
+  size_t last_access_timestamp_;
+  size_t k_;
+  bool is_evictable_{false};
+  size_t access_count_{1};
+
+  long long getSortingKey() const {
+    if (access_count_ < k_) {
+      return 0;
+    } else {
+      return last_access_timestamp_;
+    }
+  }
 };
 
 /**
@@ -74,12 +96,13 @@ class LRUKReplacer {
  private:
   // TODO(student): implement me! You can replace these member variables as you like.
   // Remove maybe_unused if you start using them.
-  [[maybe_unused]] std::unordered_map<frame_id_t, LRUKNode> node_store_;
-  [[maybe_unused]] size_t current_timestamp_{0};
-  [[maybe_unused]] size_t curr_size_{0};
+  std::unordered_map<frame_id_t, LRUKNode> node_store_;
+  std::set<LRUKNode> evictable_nodes_;
+  size_t current_timestamp_{0};
   [[maybe_unused]] size_t replacer_size_;
-  [[maybe_unused]] size_t k_;
-  [[maybe_unused]] std::mutex latch_;
+  size_t num_frames_;
+  size_t k_;
+  std::mutex latch_;
 };
 
 }  // namespace bustub
