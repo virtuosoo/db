@@ -39,18 +39,18 @@ LRUKReplacer::LRUKReplacer(size_t num_frames, size_t k) : num_frames_(num_frames
  *
  * @return the frame ID if a frame is successfully evicted, or `std::nullopt` if no frames can be evicted.
  */
-auto LRUKReplacer::Evict() -> std::optional<frame_id_t> { 
-    std::scoped_lock lock(latch_);
+auto LRUKReplacer::Evict() -> std::optional<frame_id_t> {
+  std::scoped_lock lock(latch_);
 
-    if (evictable_nodes_.empty()) {
-        return std::nullopt; 
-    }
+  if (evictable_nodes_.empty()) {
+    return std::nullopt;
+  }
 
-    auto it = evictable_nodes_.begin();
-    frame_id_t frame_id = it->fid_;
-    evictable_nodes_.erase(it);
-    node_store_.erase(frame_id);
-    return frame_id;
+  auto it = evictable_nodes_.begin();
+  frame_id_t frame_id = it->fid_;
+  evictable_nodes_.erase(it);
+  node_store_.erase(frame_id);
+  return frame_id;
 }
 
 /**
@@ -67,31 +67,31 @@ auto LRUKReplacer::Evict() -> std::optional<frame_id_t> {
  * leaderboard tests.
  */
 void LRUKReplacer::RecordAccess(frame_id_t frame_id, [[maybe_unused]] AccessType access_type) {
-    std::scoped_lock lock(latch_);
-    BUSTUB_ASSERT(static_cast<size_t>(frame_id) <= num_frames_, "frame_id must <= nums_frames");
-    
-    current_timestamp_++;
-    auto it = node_store_.find(frame_id);
+  std::scoped_lock lock(latch_);
+  BUSTUB_ASSERT(static_cast<size_t>(frame_id) <= num_frames_, "frame_id must <= nums_frames");
 
-    if (it == node_store_.end()) {
-        node_store_.emplace(frame_id, LRUKNode(frame_id, k_, current_timestamp_));
-    } else {
-        LRUKNode& node = it->second;
+  current_timestamp_++;
+  auto it = node_store_.find(frame_id);
 
-        // 如果节点是可淘汰的，先从 set 中移除旧状态的它
-        if (node.is_evictable_) {
-            evictable_nodes_.erase(node);
-        }
+  if (it == node_store_.end()) {
+    node_store_.emplace(frame_id, LRUKNode(frame_id, k_, current_timestamp_));
+  } else {
+    LRUKNode &node = it->second;
 
-        // 直接在 map 的节点上进行修改
-        node.access_count_++;
-        node.last_access_timestamp_ = current_timestamp_;
-
-        // 如果节点是可淘汰的，将更新后的它插入 set
-        if (node.is_evictable_) {
-            evictable_nodes_.insert(node);
-        }
+    // 如果节点是可淘汰的，先从 set 中移除旧状态的它
+    if (node.is_evictable_) {
+      evictable_nodes_.erase(node);
     }
+
+    // 直接在 map 的节点上进行修改
+    node.access_count_++;
+    node.last_access_timestamp_ = current_timestamp_;
+
+    // 如果节点是可淘汰的，将更新后的它插入 set
+    if (node.is_evictable_) {
+      evictable_nodes_.insert(node);
+    }
+  }
 }
 
 /**
@@ -112,25 +112,25 @@ void LRUKReplacer::RecordAccess(frame_id_t frame_id, [[maybe_unused]] AccessType
  * @param set_evictable whether the given frame is evictable or not
  */
 void LRUKReplacer::SetEvictable(frame_id_t frame_id, bool set_evictable) {
-    std::scoped_lock lock(latch_);
-    BUSTUB_ASSERT(static_cast<size_t>(frame_id) <= num_frames_, "frame_id must <= nums_frames");
+  std::scoped_lock lock(latch_);
+  BUSTUB_ASSERT(static_cast<size_t>(frame_id) <= num_frames_, "frame_id must <= nums_frames");
 
-    auto it = node_store_.find(frame_id);
-    if (it == node_store_.end()) {
-        return;
-    }
+  auto it = node_store_.find(frame_id);
+  if (it == node_store_.end()) {
+    return;
+  }
 
-    LRUKNode &node = it->second;
-    if (node.is_evictable_ == set_evictable) {
-        return;
-    }
+  LRUKNode &node = it->second;
+  if (node.is_evictable_ == set_evictable) {
+    return;
+  }
 
-    node.is_evictable_ = set_evictable;
-    if (set_evictable) {
-        evictable_nodes_.insert(node);
-    } else {
-        evictable_nodes_.erase(node);
-    }
+  node.is_evictable_ = set_evictable;
+  if (set_evictable) {
+    evictable_nodes_.insert(node);
+  } else {
+    evictable_nodes_.erase(node);
+  }
 }
 
 /**
@@ -151,19 +151,19 @@ void LRUKReplacer::SetEvictable(frame_id_t frame_id, bool set_evictable) {
  * @param frame_id id of frame to be removed
  */
 void LRUKReplacer::Remove(frame_id_t frame_id) {
-    std::scoped_lock lock(latch_);
-    BUSTUB_ASSERT(static_cast<size_t>(frame_id) <= num_frames_, "frame_id must <= nums_frames");
+  std::scoped_lock lock(latch_);
+  BUSTUB_ASSERT(static_cast<size_t>(frame_id) <= num_frames_, "frame_id must <= nums_frames");
 
-    auto it = node_store_.find(frame_id);
-    if (it == node_store_.end()) {
-        return;
-    }
-    
-    LRUKNode& node = it->second;
-    BUSTUB_ASSERT(!node.is_evictable_, "frame must be evictable");
-    
-    node_store_.erase(frame_id);
-    evictable_nodes_.erase(node);
+  auto it = node_store_.find(frame_id);
+  if (it == node_store_.end()) {
+    return;
+  }
+
+  LRUKNode &node = it->second;
+  BUSTUB_ASSERT(!node.is_evictable_, "frame must be evictable");
+
+  node_store_.erase(frame_id);
+  evictable_nodes_.erase(node);
 }
 
 /**

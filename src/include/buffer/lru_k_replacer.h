@@ -16,10 +16,9 @@
 #include <list>
 #include <mutex>  // NOLINT
 #include <optional>
+#include <set>
 #include <unordered_map>
 #include <vector>
-#include <set>
-
 
 #include "common/config.h"
 #include "common/macros.h"
@@ -29,10 +28,10 @@ namespace bustub {
 enum class AccessType { Unknown = 0, Lookup, Scan, Index };
 
 class LRUKNode {
-public:
-  LRUKNode(frame_id_t fid, size_t k, size_t time_stamp):fid_(fid), last_access_timestamp_(time_stamp), k_(k){}
+ public:
+  LRUKNode(frame_id_t fid, size_t k, size_t time_stamp) : fid_(fid), last_access_timestamp_(time_stamp), k_(k) {}
 
-  bool operator<(const LRUKNode& other) const {
+  bool operator<(const LRUKNode &other) const {
     auto this_key = getSortingKey();
     auto other_key = other.getSortingKey();
     if (this_key != other_key) {
