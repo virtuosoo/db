@@ -31,9 +31,9 @@ class LRUKNode {
  public:
   LRUKNode(frame_id_t fid, size_t k, size_t time_stamp) : fid_(fid), last_access_timestamp_(time_stamp), k_(k) {}
 
-  bool operator<(const LRUKNode &other) const {
-    auto this_key = getSortingKey();
-    auto other_key = other.getSortingKey();
+  auto operator<(const LRUKNode &other) const -> bool {
+    auto this_key = GetSortingKey();
+    auto other_key = other.GetSortingKey();
     if (this_key != other_key) {
       return this_key < other_key;
     }
@@ -49,12 +49,11 @@ class LRUKNode {
   bool is_evictable_{false};
   size_t access_count_{1};
 
-  long long getSortingKey() const {
+  auto GetSortingKey() const -> int64_t {
     if (access_count_ < k_) {
       return 0;
-    } else {
-      return last_access_timestamp_;
-    }
+    } 
+    return last_access_timestamp_;
   }
 };
 
