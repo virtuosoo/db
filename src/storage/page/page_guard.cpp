@@ -15,6 +15,16 @@
 
 namespace bustub {
 
+PageGuard::PageGuard(page_id_t page_id, std::shared_ptr<FrameHeader> frame, 
+                     std::shared_ptr<LRUKReplacer> replacer,std::shared_ptr<std::mutex> bpm_latch,
+                     std::shared_ptr<DiskScheduler> disk_scheduler) 
+    : page_id_(page_id),
+      frame_(std::move(frame)),
+      replacer_(std::move(replacer)),
+      bpm_latch_(std::move(bpm_latch)),
+      disk_scheduler_(std::move(disk_scheduler))                 {
+
+}
 /**
  * @brief The only constructor for an RAII `ReadPageGuard` that creates a valid guard.
  *
@@ -31,11 +41,8 @@ namespace bustub {
 ReadPageGuard::ReadPageGuard(page_id_t page_id, std::shared_ptr<FrameHeader> frame,
                              std::shared_ptr<LRUKReplacer> replacer, std::shared_ptr<std::mutex> bpm_latch,
                              std::shared_ptr<DiskScheduler> disk_scheduler)
-    : page_id_(page_id),
-      frame_(std::move(frame)),
-      replacer_(std::move(replacer)),
-      bpm_latch_(std::move(bpm_latch)),
-      disk_scheduler_(std::move(disk_scheduler)) {
+    : PageGuard(page_id, std::move(frame), std::move(replacer), 
+      std::move(bpm_latch), std::move(disk_scheduler)) {
   UNIMPLEMENTED("TODO(P1): Add implementation.");
 }
 
