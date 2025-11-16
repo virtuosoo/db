@@ -22,7 +22,7 @@ PageGuard::PageGuard(page_id_t page_id, std::shared_ptr<FrameHeader> frame,
       frame_(std::move(frame)),
       replacer_(std::move(replacer)),
       bpm_latch_(std::move(bpm_latch)),
-      disk_scheduler_(std::move(disk_scheduler))                 {
+      disk_scheduler_(std::move(disk_scheduler)) {
 
 }
 /**
