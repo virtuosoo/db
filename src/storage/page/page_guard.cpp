@@ -114,7 +114,7 @@ auto ReadPageGuard::operator=(ReadPageGuard &&that) noexcept -> ReadPageGuard & 
 /**
  * @brief Gets the page ID of the page this guard is protecting.
  */
-auto ReadPageGuard::GetPageId() const -> page_id_t {
+auto PageGuard::GetPageId() const -> page_id_t {
   BUSTUB_ENSURE(is_valid_, "tried to use an invalid read guard");
   return page_id_;
 }
