@@ -122,7 +122,7 @@ auto PageGuard::GetPageId() const -> page_id_t {
 /**
  * @brief Gets a `const` pointer to the page of data this guard is protecting.
  */
-auto ReadPageGuard::GetData() const -> const char * {
+auto PageGuard::GetData() const -> const char * {
   BUSTUB_ENSURE(is_valid_, "tried to use an invalid read guard");
   return frame_->GetData();
 }
@@ -130,7 +130,7 @@ auto ReadPageGuard::GetData() const -> const char * {
 /**
  * @brief Returns whether the page is dirty (modified but not flushed to the disk).
  */
-auto ReadPageGuard::IsDirty() const -> bool {
+auto PageGuard::IsDirty() const -> bool {
   BUSTUB_ENSURE(is_valid_, "tried to use an invalid read guard");
   return frame_->is_dirty_;
 }
@@ -140,7 +140,7 @@ auto ReadPageGuard::IsDirty() const -> bool {
  *
  * TODO(P1): Add implementation.
  */
-void ReadPageGuard::Flush() { UNIMPLEMENTED("TODO(P1): Add implementation."); }
+void PageGuard::Flush() { UNIMPLEMENTED("TODO(P1): Add implementation."); }
 
 /**
  * @brief Manually drops a valid `ReadPageGuard`'s data. If this guard is invalid, this function does nothing.
@@ -153,7 +153,7 @@ void ReadPageGuard::Flush() { UNIMPLEMENTED("TODO(P1): Add implementation."); }
  *
  * TODO(P1): Add implementation.
  */
-void ReadPageGuard::Drop() { UNIMPLEMENTED("TODO(P1): Add implementation."); }
+void PageGuard::Drop() { UNIMPLEMENTED("TODO(P1): Add implementation."); }
 
 /** @brief The destructor for `ReadPageGuard`. This destructor simply calls `Drop()`. */
 ReadPageGuard::~ReadPageGuard() { Drop(); }
