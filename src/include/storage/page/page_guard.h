@@ -40,10 +40,12 @@ public:
   void Flush();
   void Drop();
   ~PageGuard();
-protected:
+ protected:
   explicit PageGuard(page_id_t page_id, std::shared_ptr<FrameHeader> frame, std::shared_ptr<LRUKReplacer> replacer,
                          std::shared_ptr<std::mutex> bpm_latch, std::shared_ptr<DiskScheduler> disk_scheduler);
-    /** @brief The page ID of the page we are guarding. */
+
+ public:
+  /** @brief The page ID of the page we are guarding. */
   page_id_t page_id_;
 
   /**
@@ -114,6 +116,7 @@ class ReadPageGuard : public PageGuard {
    *
    * In other words, the only way to get a valid `ReadPageGuard` is through the buffer pool manager.
    */
+    ReadPageGuard() = default;
     ReadPageGuard(ReadPageGuard &&that) noexcept;
     ReadPageGuard &operator=(ReadPageGuard &&that) noexcept;
 
@@ -143,6 +146,7 @@ class ReadPageGuard : public PageGuard {
 class WritePageGuard : public PageGuard {
   /** @brief Only the buffer pool manager is allowed to construct a valid `WritePageGuard.` */
   friend class BufferPoolManager;
+  
 
  public:
   /**
@@ -156,7 +160,7 @@ class WritePageGuard : public PageGuard {
    *
    * In other words, the only way to get a valid `WritePageGuard` is through the buffer pool manager.
    */
-
+  WritePageGuard() = default;
   WritePageGuard(WritePageGuard &&that) noexcept;
   WritePageGuard &operator=(WritePageGuard &&that) noexcept;
 
