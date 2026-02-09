@@ -26,26 +26,6 @@ PageGuard::PageGuard(page_id_t page_id, std::shared_ptr<FrameHeader> frame,
       is_valid_(true) {
 
 }
-/**
- * @brief The only constructor for an RAII `ReadPageGuard` that creates a valid guard.
- *
- * Note that only the buffer pool manager is allowed to call this constructor.
- *
- * TODO(P1): Add implementation.
- *
- * @param page_id The page ID of the page we want to read.
- * @param frame A shared pointer to the frame that holds the page we want to protect.
- * @param replacer A shared pointer to the buffer pool manager's replacer.
- * @param bpm_latch A shared pointer to the buffer pool manager's latch.
- * @param disk_scheduler A shared pointer to the buffer pool manager's disk scheduler.
- */
-ReadPageGuard::ReadPageGuard(page_id_t page_id, std::shared_ptr<FrameHeader> frame,
-                             std::shared_ptr<LRUKReplacer> replacer, std::shared_ptr<std::mutex> bpm_latch,
-                             std::shared_ptr<DiskScheduler> disk_scheduler)
-    : PageGuard(page_id, std::move(frame), std::move(replacer), 
-      std::move(bpm_latch), std::move(disk_scheduler)) {
-
-}
 
 PageGuard::PageGuard(PageGuard &&that) noexcept {
   this->page_id_ = that.page_id_;
@@ -66,49 +46,6 @@ auto PageGuard::operator=(PageGuard &&that) noexcept -> PageGuard & {
   this->is_valid_ = true;
   that.is_valid_ = false;
   return *this; 
-}
-
-/**
- * @brief The move constructor for `ReadPageGuard`.
- *
- * ### Implementation
- *
- * If you are unfamiliar with move semantics, please familiarize yourself with learning materials online. There are many
- * great resources (including articles, Microsoft tutorials, YouTube videos) that explain this in depth.
- *
- * Make sure you invalidate the other guard, otherwise you might run into double free problems! For both objects, you
- * need to update _at least_ 5 fields each.
- *
- * TODO(P1): Add implementation.
- *
- * @param that The other page guard.
- */
-ReadPageGuard::ReadPageGuard(ReadPageGuard &&that) noexcept :PageGuard(std::move(that)) {
-
-}
-
-/**
- * @brief The move assignment operator for `ReadPageGuard`.
- *
- * ### Implementation
- *
- * If you are unfamiliar with move semantics, please familiarize yourself with learning materials online. There are many
- * great resources (including articles, Microsoft tutorials, YouTube videos) that explain this in depth.
- *
- * Make sure you invalidate the other guard, otherwise you might run into double free problems! For both objects, you
- * need to update _at least_ 5 fields each, and for the current object, make sure you release any resources it might be
- * holding on to.
- *
- * TODO(P1): Add implementation.
- *
- * @param that The other page guard.
- * @return ReadPageGuard& The newly valid `ReadPageGuard`.
- */
-auto ReadPageGuard::operator=(ReadPageGuard &&that) noexcept -> ReadPageGuard & { 
-    if (this != &that) {
-      PageGuard::operator=(std::move(that)); // 调用基类移动赋值
-    }
-    return *this;
 }
 
 /**
@@ -156,7 +93,71 @@ void PageGuard::Flush() { UNIMPLEMENTED("TODO(P1): Add implementation."); }
 void PageGuard::Drop() { UNIMPLEMENTED("TODO(P1): Add implementation."); }
 
 /** @brief The destructor for `ReadPageGuard`. This destructor simply calls `Drop()`. */
-ReadPageGuard::~ReadPageGuard() { Drop(); }
+PageGuard::~PageGuard() { Drop(); }
+/**
+ * @brief The only constructor for an RAII `ReadPageGuard` that creates a valid guard.
+ *
+ * Note that only the buffer pool manager is allowed to call this constructor.
+ *
+ * TODO(P1): Add implementation.
+ *
+ * @param page_id The page ID of the page we want to read.
+ * @param frame A shared pointer to the frame that holds the page we want to protect.
+ * @param replacer A shared pointer to the buffer pool manager's replacer.
+ * @param bpm_latch A shared pointer to the buffer pool manager's latch.
+ * @param disk_scheduler A shared pointer to the buffer pool manager's disk scheduler.
+ */
+ReadPageGuard::ReadPageGuard(page_id_t page_id, std::shared_ptr<FrameHeader> frame,
+                             std::shared_ptr<LRUKReplacer> replacer, std::shared_ptr<std::mutex> bpm_latch,
+                             std::shared_ptr<DiskScheduler> disk_scheduler)
+    : PageGuard(page_id, std::move(frame), std::move(replacer), 
+      std::move(bpm_latch), std::move(disk_scheduler)) {
+
+}
+
+
+/**
+ * @brief The move constructor for `ReadPageGuard`.
+ *
+ * ### Implementation
+ *
+ * If you are unfamiliar with move semantics, please familiarize yourself with learning materials online. There are many
+ * great resources (including articles, Microsoft tutorials, YouTube videos) that explain this in depth.
+ *
+ * Make sure you invalidate the other guard, otherwise you might run into double free problems! For both objects, you
+ * need to update _at least_ 5 fields each.
+ *
+ * TODO(P1): Add implementation.
+ *
+ * @param that The other page guard.
+ */
+ReadPageGuard::ReadPageGuard(ReadPageGuard &&that) noexcept :PageGuard(std::move(that)) {
+
+}
+
+/**
+ * @brief The move assignment operator for `ReadPageGuard`.
+ *
+ * ### Implementation
+ *
+ * If you are unfamiliar with move semantics, please familiarize yourself with learning materials online. There are many
+ * great resources (including articles, Microsoft tutorials, YouTube videos) that explain this in depth.
+ *
+ * Make sure you invalidate the other guard, otherwise you might run into double free problems! For both objects, you
+ * need to update _at least_ 5 fields each, and for the current object, make sure you release any resources it might be
+ * holding on to.
+ *
+ * TODO(P1): Add implementation.
+ *
+ * @param that The other page guard.
+ * @return ReadPageGuard& The newly valid `ReadPageGuard`.
+ */
+auto ReadPageGuard::operator=(ReadPageGuard &&that) noexcept -> ReadPageGuard & { 
+    if (this != &that) {
+      PageGuard::operator=(std::move(that)); // 调用基类移动赋值
+    }
+    return *this;
+}
 
 /**********************************************************************************************************************/
 /**********************************************************************************************************************/

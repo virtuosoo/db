@@ -114,6 +114,8 @@ class ReadPageGuard : public PageGuard {
    *
    * In other words, the only way to get a valid `ReadPageGuard` is through the buffer pool manager.
    */
+    ReadPageGuard(ReadPageGuard &&that) noexcept;
+    ReadPageGuard &operator=(ReadPageGuard &&that) noexcept;
 
  private:
   /** @brief Only the buffer pool manager is allowed to construct a valid `ReadPageGuard.` */
@@ -154,6 +156,9 @@ class WritePageGuard : public PageGuard {
    *
    * In other words, the only way to get a valid `WritePageGuard` is through the buffer pool manager.
    */
+
+  WritePageGuard(WritePageGuard &&that) noexcept;
+  WritePageGuard &operator=(WritePageGuard &&that) noexcept;
 
   auto GetDataMut() -> char *;
   template <class T>
