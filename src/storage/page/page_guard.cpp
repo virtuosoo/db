@@ -225,4 +225,9 @@ auto WritePageGuard::operator=(WritePageGuard &&that) noexcept -> WritePageGuard
     return *this;
   }
 
+auto WritePageGuard::GetDataMut() -> char * {
+  BUSTUB_ENSURE(is_valid_, "tried to use an invalid write guard");
+  return frame_->GetDataMut();
+}
+
 }  // namespace bustub

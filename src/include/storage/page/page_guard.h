@@ -155,6 +155,12 @@ class WritePageGuard : public PageGuard {
    * In other words, the only way to get a valid `WritePageGuard` is through the buffer pool manager.
    */
 
+  auto GetDataMut() -> char *;
+  template <class T>
+  auto AsMut() -> T * {
+    return reinterpret_cast<T *>(GetDataMut());
+  }
+
  private:
   /** @brief Only the buffer pool manager is allowed to construct a valid `WritePageGuard.` */
   explicit WritePageGuard(page_id_t page_id, std::shared_ptr<FrameHeader> frame, std::shared_ptr<LRUKReplacer> replacer,
